@@ -5,6 +5,8 @@ on:
     branches: ["**"]  # Run on every single push to any branch
   pull_request:
     branches: [main]
+  workflow_call:
+
 
 jobs:
   test:
