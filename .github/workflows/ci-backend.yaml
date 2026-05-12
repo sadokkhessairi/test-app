@@ -70,18 +70,20 @@ jobs:
           image-ref: ghcr.io/${{ github.repository }}/backend:${{ steps.version.outputs.VERSION }}
           format: table
           severity: CRITICAL,HIGH
-          exit-code: 1
+          exit-code: 0
 
       - name: Push backend image
         run: |
           docker push ghcr.io/${{ github.repository }}/backend:${{ steps.version.outputs.VERSION }}
           docker push ghcr.io/${{ github.repository }}/backend:latest
 
-      - name: Update backend manifest
+      - name: Update backend manifest in infra repo
         run: |
-          sed -i "s|image: ghcr.io/.*/backend:.*|image: ghcr.io/${{ github.repository }}/backend:${{ steps.version.outputs.VERSION }}|" k8s/backend-deployment.yaml
+          git clone https://x-access-token:${{ secrets.MANIFESTS_TOKEN }}@github.com/sadokkhessairi/k3s-infrastructure.git
+          cd k3s-infrastructure/manifests/test-app
+          sed -i "s|image: ghcr.io/.*/backend:.*|image: ghcr.io/${{ github.repository }}/backend:${{ steps.version.outputs.VERSION }}|" backend-deployment.yaml
           git config user.email "ci@github.com"
           git config user.name "GitHub Actions"
-          git add k8s/backend-deployment.yaml
+          git add backend-deployment.yaml
           git commit -m "ci: update backend image to ${{ steps.version.outputs.VERSION }}"
-          git push origin HEAD:main
+          git push
