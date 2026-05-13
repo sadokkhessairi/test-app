@@ -79,7 +79,7 @@ jobs:
       - name: Update frontend manifest in infra repo
         run: |
           git clone https://x-access-token:${{ secrets.MANIFESTS_TOKEN }}@github.com/sadokkhessairi/k3s-infra.git
-          cd k3s-infra/manifests/test-app
+          cd k3s-infra/manifests/app-manifests
           sed -i "s|image: ghcr.io/.*/frontend:.*|image: ghcr.io/${{ github.repository }}/frontend:${{ steps.version.outputs.VERSION }}|" frontend-deployment.yaml
           git config user.email "ci@github.com"
           git config user.name "GitHub Actions"

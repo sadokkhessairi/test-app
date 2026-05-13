@@ -80,7 +80,7 @@ jobs:
       - name: Update backend manifest in infra repo
         run: |
           git clone https://x-access-token:${{ secrets.MANIFESTS_TOKEN }}@github.com/sadokkhessairi/k3s-infra.git
-          cd k3s-infra/manifests/test-app
+          cd k3s-infra/manifests/app-manifests
           sed -i "s|image: ghcr.io/.*/backend:.*|image: ghcr.io/${{ github.repository }}/backend:${{ steps.version.outputs.VERSION }}|" backend-deployment.yaml
           git config user.email "ci@github.com"
           git config user.name "GitHub Actions"
