@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, Float, String, BigInteger
-from backend.database import Base
+from database import Base
 
 class MachineMetric(Base):
     __tablename__ = "machine_metrics"
