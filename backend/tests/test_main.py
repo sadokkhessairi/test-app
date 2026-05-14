@@ -229,7 +229,6 @@ def test_check_alerts_no_alert_below_threshold():
 def test_check_alerts_no_duplicate_alerts():
     """Same alert ID should not be inserted twice."""
     from backend.main import _check_alerts
-    import time
 
     db = TestingSessionLocal()
     reading = {
