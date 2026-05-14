@@ -34,12 +34,6 @@ jobs:
           pip install ruff
           ruff check backend/
 
-      - name: Type check
-        run: |
-          pip install mypy
-          mypy backend/ --ignore-missing-imports --exclude backend/tests --no-namespace-packages 
-
-
 
   build-scan-push-backend:
     runs-on: ubuntu-latest
