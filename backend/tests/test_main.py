@@ -110,7 +110,7 @@ def test_alerts_returns_list():
 def test_alerts_contain_correct_fields():
     """Each alert must have all expected fields."""
     from backend.models import Alert
-    import time
+    #import time
     db = TestingSessionLocal()
     db.add(Alert(
         id="M1-temperature-9999",
