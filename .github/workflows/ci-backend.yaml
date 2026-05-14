@@ -37,9 +37,7 @@ jobs:
       - name: Type check
         run: |
           pip install mypy
-          cd backend
-          mypy . --ignore-missing-imports --explicit-package-bases
-
+          mypy backend/ --ignore-missing-imports --explicit-package-bases
 
   build-scan-push-backend:
     runs-on: ubuntu-latest
