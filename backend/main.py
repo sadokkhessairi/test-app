@@ -5,9 +5,9 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-from backend.database import Base, engine, get_db
-from backend.models import MachineMetric, Alert
-from backend.simulator import MACHINES, generate_reading
+from database import Base, engine, get_db
+from models import MachineMetric, Alert
+from simulator import MACHINES, generate_reading
 
 # ── DB init ───────────────────────────────────────────────────────────────────
 os.makedirs("/data", exist_ok=True)
@@ -57,7 +57,7 @@ def _check_alerts(reading: dict, db: Session) -> None:
 
 # ── Background task — generates a reading every 5 s ──────────────────────────
 async def _simulator_loop() -> None:
-    from backend.database import SessionLocal
+    from database import SessionLocal
     while True:
         db = SessionLocal()
         try:
