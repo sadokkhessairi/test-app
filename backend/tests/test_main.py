@@ -4,8 +4,8 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from backend.database import Base, get_db
-from backend.main import app
+from database import Base, get_db
+from main import app
 
 # ── Use a separate in-memory SQLite DB for tests ──────────────────────────────
 TEST_DB_URL = "sqlite:///./test.db"
@@ -51,7 +51,7 @@ def test_latest_no_data_returns_simulated_reading():
 
 def test_latest_returns_most_recent_row():
     """Should return the latest row when data exists."""
-    from backend.models import MachineMetric
+    from models import MachineMetric
     db = TestingSessionLocal()
     db.add(MachineMetric(machine_id="M1", temperature=70.0, vibration=2.0, pression=5.0, t=1000))
     db.add(MachineMetric(machine_id="M1", temperature=85.0, vibration=3.0, pression=6.0, t=2000))
@@ -68,7 +68,7 @@ def test_latest_returns_most_recent_row():
 # ── /machines/{machine_id}/history ────────────────────────────────────────────
 def test_history_returns_chronological_order():
     """History should be returned oldest first (reversed in the route)."""
-    from backend.models import MachineMetric
+    from models import MachineMetric
     db = TestingSessionLocal()
     db.add(MachineMetric(machine_id="M1", temperature=70.0, vibration=2.0, pression=5.0, t=1000))
     db.add(MachineMetric(machine_id="M1", temperature=80.0, vibration=2.5, pression=5.5, t=2000))
@@ -84,7 +84,7 @@ def test_history_returns_chronological_order():
 
 def test_history_limit_param():
     """limit query param should cap results."""
-    from backend.models import MachineMetric
+    from models import MachineMetric
     db = TestingSessionLocal()
     for i in range(20):
         db.add(MachineMetric(machine_id="M2", temperature=70.0, vibration=2.0, pression=5.0, t=i))
@@ -110,7 +110,7 @@ def test_alerts_returns_list():
 
 def test_alerts_contain_correct_fields():
     """Each alert must have all expected fields."""
-    from backend.models import Alert
+    from models import Alert
     #import time
     db = TestingSessionLocal()
     db.add(Alert(
@@ -136,7 +136,7 @@ def test_alerts_contain_correct_fields():
 
 def test_alerts_auto_resolves_old_alerts():
     """Alerts older than 60s should be auto-resolved on GET /alerts."""
-    from backend.models import Alert
+    from models import Alert
     db = TestingSessionLocal()
     old_ts = 1000  # very old timestamp
     db.add(Alert(
@@ -163,7 +163,7 @@ def test_alerts_auto_resolves_old_alerts():
 # ── Alert threshold logic ─────────────────────────────────────────────────────
 def test_check_alerts_creates_critical_alert():
     """_check_alerts should create a CRITICAL alert when value exceeds threshold."""
-    from backend.main import _check_alerts
+    from main import _check_alerts
     import time
 
     db = TestingSessionLocal()
@@ -177,7 +177,7 @@ def test_check_alerts_creates_critical_alert():
     _check_alerts(reading, db)
     db.commit()
 
-    from backend.models import Alert
+    from models import Alert
     alert = db.query(Alert).filter(Alert.machine_id == "M1", Alert.metric == "temperature").first()
     assert alert is not None
     assert alert.severity == "CRITICAL"
@@ -185,7 +185,7 @@ def test_check_alerts_creates_critical_alert():
 
 def test_check_alerts_creates_warning_alert():
     """_check_alerts should create a WARNING alert when value is between warning and critical."""
-    from backend.main import _check_alerts
+    from main import _check_alerts
     import time
 
     db = TestingSessionLocal()
@@ -199,7 +199,7 @@ def test_check_alerts_creates_warning_alert():
     _check_alerts(reading, db)
     db.commit()
 
-    from backend.models import Alert
+    from models import Alert
     alert = db.query(Alert).filter(Alert.machine_id == "M2", Alert.metric == "temperature").first()
     assert alert is not None
     assert alert.severity == "WARNING"
@@ -207,7 +207,7 @@ def test_check_alerts_creates_warning_alert():
 
 def test_check_alerts_no_alert_below_threshold():
     """_check_alerts should create NO alert when all values are normal."""
-    from backend.main import _check_alerts
+    from main import _check_alerts
     import time
 
     db = TestingSessionLocal()
@@ -221,14 +221,14 @@ def test_check_alerts_no_alert_below_threshold():
     _check_alerts(reading, db)
     db.commit()
 
-    from backend.models import Alert
+    from models import Alert
     count = db.query(Alert).filter(Alert.machine_id == "M3").count()
     assert count == 0
     db.close()
 
 def test_check_alerts_no_duplicate_alerts():
     """Same alert ID should not be inserted twice."""
-    from backend.main import _check_alerts
+    from main import _check_alerts
 
     db = TestingSessionLocal()
     reading = {
@@ -242,7 +242,7 @@ def test_check_alerts_no_duplicate_alerts():
     _check_alerts(reading, db)  # call twice with same data
     db.commit()
 
-    from backend.models import Alert
+    from models import Alert
     count = db.query(Alert).filter(Alert.machine_id == "M4").count()
     assert count == 1   # still only 1, not 2
     db.close()
